@@ -8,7 +8,7 @@
 ## Primer Avance
 
 ## Código:
-
+```cpp
 #include <iostream> 
 #include <fstream>
 #include <sstream>
@@ -273,6 +273,8 @@ int main() {
 
     return 0;
 }
+
+```
 
 ## Descripción
 Este proyecto es una aplicación en C++ para gestionar una lista de reproducción de canciones, utilizando una lista doblemente enlazada para almacenar y manipular la información de las canciones. Permite cargar canciones desde un archivo CSV, agregar y eliminar canciones, cambiar su orden en la lista y reproducirlas de manera aleatoria.
