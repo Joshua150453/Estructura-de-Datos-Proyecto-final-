@@ -248,7 +248,7 @@ void cargar_canciones_desde_csv(const string& nombre_archivo, ListaDobleEnlazada
 int main() {
     ListaDobleEnlazada playlist;
 
-    cargar_canciones_desde_csv("spotify_data.txt", playlist);
+    cargar_canciones_desde_csv("spotify_data.csv", playlist);
 
     playlist.imprimir_lista();
 
