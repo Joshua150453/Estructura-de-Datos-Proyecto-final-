@@ -607,40 +607,40 @@ int main() {
 #### 1. Inclusión de Bibliotecas:
 El código incluye varias bibliotecas estándar de C++:
 
-#include <iostream>: Para manejar entrada y salida en consola.
-#include <fstream>: Para manejar operaciones de archivos.
-#include <sstream>: Para procesar cadenas de texto, útil al leer CSV.
-#include <string>: Para manejar cadenas de texto (std::string).
-#include <vector>: Para manejar vectores dinámicos.
-#include <algorithm>: Para usar funciones como std::shuffle.
-#include <random>: Para generar números aleatorios, utilizado en la reproducción aleatoria de canciones.
+- #include <iostream>: Para manejar entrada y salida en consola.
+- #include <fstream>: Para manejar operaciones de archivos.
+- #include <sstream>: Para procesar cadenas de texto, útil al leer CSV.
+- #include <string>: Para manejar cadenas de texto (std::string).
+- #include <vector>: Para manejar vectores dinámicos.
+- #include <algorithm>: Para usar funciones como std::shuffle.
+- #include <random>: Para generar números aleatorios, utilizado en la reproducción aleatoria de canciones.
 
 #### 2. Definición de la estructura Cancion
 Se define una estructura Cancion que representa una canción con múltiples atributos, como:
 
-Nombre del artista (artist_name)
-Nombre de la pista (track_name)
-ID de la pista (track_id)
-Popularidad, género, y otros datos numéricos relevantes (por ejemplo, danceability, energy, etc.).
+- Nombre del artista (artist_name)
+- Nombre de la pista (track_name)
+- ID de la pista (track_id)
+- Popularidad, género, y otros datos numéricos relevantes (por ejemplo, danceability, energy, etc.).
 
 #### 3. Clase NodoCancion
 Se define una clase que representa un nodo de una lista doblemente enlazada:
 
-Atributos:
-cancion: Almacena un objeto Cancion.
-anterior y siguiente: Punteros a los nodos adyacentes.
+##### Atributos:
+- cancion: Almacena un objeto Cancion.
+- anterior y siguiente: Punteros a los nodos adyacentes.
 
-Constructor:
+##### Constructor:
 Inicializa el nodo con una canción específica y establece los punteros como nullptr.
 
 #### 4. Clase ListaDobleEnlazada
 Esta clase implementa una lista doblemente enlazada para manejar una lista de reproducción:
 
-Atributos:
-cabeza y cola: Apuntan al primer y último nodo de la lista.
-tamano: Lleva un conteo de los nodos en la lista.
+##### Atributos:
+- cabeza y cola: Apuntan al primer y último nodo de la lista.
+- tamano: Lleva un conteo de los nodos en la lista.
 
-Métodos principales:
+##### Métodos principales:
 ##### Carga de Canciones desde un Archivo CSV:
 El programa lee canciones desde un archivo CSV y las agrega a una lista doblemente enlazada.
 
@@ -662,17 +662,17 @@ Muestra la lista completa de canciones con su orden actual.
 #### 5. Función cargar_canciones_desde_csv
 Esta función:
 
-Lee un archivo CSV línea por línea.
-Convierte cada línea en un objeto Cancion.
-Agrega cada canción a la lista usando el método agregar_cancion.
-Ignora la primera línea del archivo, asumiendo que es un encabezado.
+- Lee un archivo CSV línea por línea.
+- Convierte cada línea en un objeto Cancion.
+- Agrega cada canción a la lista usando el método agregar_cancion.
+- Ignora la primera línea del archivo, asumiendo que es un encabezado.
 
 #### 6. Función main
 La función principal realiza lo siguiente:
 
-Crea una instancia de ListaDobleEnlazada para almacenar las canciones.
-Llama a cargar_canciones_desde_csv para leer canciones desde un archivo llamado spotify_data.csv.
-Pregunta al usuario si desea imprimir la lista de canciones y, si responde "si", llama a imprimir_lista para mostrarla.
+- Crea una instancia de ListaDobleEnlazada para almacenar las canciones.
+- Llama a cargar_canciones_desde_csv para leer canciones desde un archivo llamado spotify_data.csv.
+- Pregunta al usuario si desea imprimir la lista de canciones y, si responde "si", llama a imprimir_lista para mostrarla.
 
 ### Futuras Mejoras:
 
