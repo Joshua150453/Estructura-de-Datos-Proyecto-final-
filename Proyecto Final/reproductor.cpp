@@ -5,7 +5,8 @@
 #include <vector>
 #include <functional> // Para std::hash
 #include <algorithm> // Para std::transform
-
+#include <ctime> 
+#include <random>
 using namespace std;
 
 // Estructura para almacenar información de una canción
@@ -78,7 +79,7 @@ public:
 // Clase para el árbol binario de búsqueda
 class BST {
 private:
-    NodoBST* raiz;
+    
 
     // Función auxiliar para insertar en el árbol binario de búsqueda
     void insertarRecursivo(NodoBST*& nodo, const pair<size_t, Cancion>& clave) {
@@ -114,43 +115,50 @@ private:
     }
 
     // Función auxiliar para eliminar un nodo en el árbol
-    NodoBST* eliminarRecursivo(NodoBST* nodo, const string& nombreCancion) {
-        if (nodo == nullptr) {
-            return nodo; // Nodo no encontrado
-        }
+    string aMayuscula(const string& cadena) {
+    string resultado = cadena;
+    transform(resultado.begin(), resultado.end(), resultado.begin(), ::toupper);
+    return resultado;
+}
 
-        // Comparar el nombre de la canción para decidir el camino
-        if (nombreCancion < nodo->clave.second.track_name) {
-            nodo->izquierdo = eliminarRecursivo(nodo->izquierdo, nombreCancion);
-        } else if (nombreCancion > nodo->clave.second.track_name) {
-            nodo->derecho = eliminarRecursivo(nodo->derecho, nombreCancion);
-        } else {
-            // Nodo encontrado
-            if (nodo->izquierdo == nullptr && nodo->derecho == nullptr) {
-                // Caso 1: Nodo sin hijos
-                delete nodo;
-                return nullptr;
-            } else if (nodo->izquierdo == nullptr) {
-                // Caso 2: Nodo con un solo hijo (derecho)
-                NodoBST* temp = nodo->derecho;
-                delete nodo;
-                return temp;
-            } else if (nodo->derecho == nullptr) {
-                // Caso 2: Nodo con un solo hijo (izquierdo)
-                NodoBST* temp = nodo->izquierdo;
-                delete nodo;
-                return temp;
-            } else {
-                // Caso 3: Nodo con dos hijos
-                NodoBST* temp = encontrarMin(nodo->derecho); // Encontrar el menor en el subárbol derecho
-                nodo->clave = temp->clave; // Reemplazar datos
-                nodo->derecho = eliminarRecursivo(nodo->derecho, temp->clave.second.track_name); // Eliminar sucesor
-            }
-        }
-        return nodo;
+NodoBST* eliminarRecursivo(NodoBST* nodo, const string& nombreCancion) {
+    if (nodo == nullptr) {
+        return nodo; // Nodo no encontrado
     }
 
+    // Normalizar nombres a mayúsculas
+    string nombreActual = aMayuscula(nodo->clave.second.track_name);
+    string nombreBuscado = aMayuscula(nombreCancion);
+
+    if (nombreBuscado < nombreActual) {
+        nodo->izquierdo = eliminarRecursivo(nodo->izquierdo, nombreCancion);
+    } else if (nombreBuscado > nombreActual) {
+        nodo->derecho = eliminarRecursivo(nodo->derecho, nombreCancion);
+    } else {
+        // Nodo encontrado: Proceder con eliminación
+        if (nodo->izquierdo == nullptr && nodo->derecho == nullptr) {
+            delete nodo;
+            return nullptr;
+        } else if (nodo->izquierdo == nullptr) {
+            NodoBST* temp = nodo->derecho;
+            delete nodo;
+            return temp;
+        } else if (nodo->derecho == nullptr) {
+            NodoBST* temp = nodo->izquierdo;
+            delete nodo;
+            return temp;
+        } else {
+            NodoBST* temp = encontrarMin(nodo->derecho);
+            nodo->clave = temp->clave;
+            nodo->derecho = eliminarRecursivo(nodo->derecho, temp->clave.second.track_name);
+        }
+    }
+    return nodo;
+}
+
 public:
+
+    NodoBST* raiz;
     BST() : raiz(nullptr) {}
 
     // Insertar una nueva canción en el árbol
@@ -344,7 +352,7 @@ void eliminarCancion(BST arboles[26]) {
         
         if(arboles[indice].eliminar(nombreCancion)){
         
-        cout << "Se eliminó la canción: \"" << nombreCancion << "\" en el bucket " << letra_inicial << "." << endl;
+            cout << "Se eliminó la canción: \"" << nombreCancion << "\" en el bucket " << letra_inicial << "." << endl;
         }else{
             
             cout<<"Nombre inválido"<<endl;
@@ -390,8 +398,75 @@ void buscarCanciones(const BST arboles[], const string& consulta) {
     }
 }
 
+void recopilarCanciones(NodoBST* nodo, vector<Cancion>& canciones) {
+    if (!nodo) return;
 
+    // Recorrido en orden (in-order traversal)
+    recopilarCanciones(nodo->izquierdo, canciones);
+    canciones.push_back(nodo->clave.second); // Suponiendo que las canciones están en el nodo
+    recopilarCanciones(nodo->derecho, canciones);
+}
 
+void imprimirCancionesAleatorias(BST arboles[26]) {
+    vector<Cancion> todasLasCanciones;
+
+    // Recopila canciones de todos los buckets
+    for (int i = 0; i < 26; ++i) {
+        recopilarCanciones(arboles[i].raiz, todasLasCanciones); // Suponiendo que la raíz es accesible
+    }
+
+    // Mezclar canciones de forma aleatoria
+    random_device rd;
+    mt19937 gen(rd()); // Generador de números aleatorios
+    shuffle(todasLasCanciones.begin(), todasLasCanciones.end(), gen);
+
+    // Imprimir las canciones mezcladas
+    cout << "Canciones en orden aleatorio:\n";
+    for (const auto& cancion : todasLasCanciones) {
+        cout <<"Canción: "<< cancion.track_name << " - Artista: " << cancion.artist_name << endl;
+    }
+    cout<<endl;
+}
+void cambiar_orden(BST arboles[26], int pos1, int pos2) {
+    vector<Cancion> todasLasCanciones;
+
+    // Recopila canciones de todos los buckets
+    for (int i = 0; i < 26; ++i) {
+        recopilarCanciones(arboles[i].raiz, todasLasCanciones);
+    }
+
+    // Validar posiciones
+    if (pos1 < 1 || pos2 < 1 || pos1 > todasLasCanciones.size() || pos2 > todasLasCanciones.size()) {
+        cerr << "Error: Las posiciones ingresadas están fuera de rango." << endl;
+        return;
+    }
+
+    // Convertir a índices (0-based)
+    int index1 = pos1 - 1;
+    int index2 = pos2 - 1;
+
+    // Intercambiar las canciones en las posiciones especificadas
+    swap(todasLasCanciones[index1], todasLasCanciones[index2]);
+
+    // Vaciar los árboles y reconstruirlos con el nuevo orden
+    for (int i = 0; i < 26; ++i) {
+        arboles[i] = BST(); // Reiniciar los árboles
+    }
+
+    for (const auto& cancion : todasLasCanciones) {
+        char letra_inicial = toupper(cancion.track_name[0]);
+        if (letra_inicial >= 'A' && letra_inicial <= 'Z') {
+            arboles[letra_inicial - 'A'].insertar(cancion);
+        }
+    }
+
+    cout << "Las posiciones " << pos1 << " y " << pos2 << " han sido intercambiadas." << endl;
+    
+    for (int i = 0; i < todasLasCanciones.size(); i++) {
+        cout <<"Cancion: " <<todasLasCanciones.at(i).track_name <<" - Artista: "<<todasLasCanciones.at(i).artist_name<<endl; ;
+    }
+    cout<<endl;
+}
 
 int main() {
     BST arboles[26]; // Crear un arreglo de 26 árboles binarios de búsqueda (uno por cada letra del abecedario)
@@ -399,18 +474,19 @@ int main() {
     cout << "Cargando archivo..." << endl;
     cargar_canciones_desde_csv("spotify_data.csv", arboles);
     cout << "Archivo cargado." << endl;
+    int entrada= 99;
     
-    int confirmacion= 1;
-    
-    while(confirmacion!=0){
+    while(entrada!=0){
 
         cout<<"Menú:"<<endl;
         cout<<"digite 1 para agregar una cancion"<<endl;
         cout<<"digite 2 para eliminar una canción"<<endl;
         cout<<"digite 3 para buscar una canción"<<endl;
         cout<<"digite 4 para imprimir las canciones"<<endl;
+        cout<<"digite 5 para reproducir de manera aleatoria las canciones"<<endl;
+        cout<<"digite 6 para cambiar el orden de las canciones"<<endl;
         cout<<"digite 0 para salir"<<endl;
-        int entrada;
+        
         cin>>entrada;
         if(entrada ==1){
             
@@ -445,6 +521,24 @@ int main() {
                 }
             }
             cout<<endl;
+        }
+        
+        if(entrada== 5){
+            
+            imprimirCancionesAleatorias(arboles);
+        }
+        
+        if(entrada == 6){
+            
+            int pos1;
+            int pos2;
+            
+            cout<<"Ingrese la posición de la canción"<<endl;
+            cin>>pos1;
+            cout<<"Ingrese la posición a la que se desea cambiar"<<endl;
+            cin>>pos2;
+            
+            cambiar_orden(arboles, pos1, pos2);
         }
         
         if(entrada == 0){
