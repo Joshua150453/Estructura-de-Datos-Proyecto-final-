@@ -38,7 +38,7 @@ struct Cancion {
         const size_t prime3 = 0xc2b2ae35;
         const size_t seed = 0x27d4eb2f165667c5;
 
-        auto combine = [](size_t hash, const std::string &str) {
+        auto combine = [](size_t hash, const std::string& str) {
             std::hash<std::string> hasher;
             size_t value = hasher(str);
             value ^= (value >> 30);
@@ -47,7 +47,7 @@ struct Cancion {
             value *= prime2;
             value ^= (value >> 31);
             return hash ^ value;
-        };
+            };
 
         size_t result = seed;
         result = combine(result, track_name);
@@ -79,26 +79,28 @@ public:
 // Clase para el árbol binario de búsqueda
 class BST {
 private:
-    
+
 
     // Función auxiliar para insertar en el árbol binario de búsqueda
     void insertarRecursivo(NodoBST*& nodo, const pair<size_t, Cancion>& clave) {
         if (nodo == nullptr) {
             nodo = new NodoBST(clave);
-        } else if (clave.first < nodo->clave.first) {
+        }
+        else if (clave.first < nodo->clave.first) {
             insertarRecursivo(nodo->izquierdo, clave);
-        } else {
+        }
+        else {
             insertarRecursivo(nodo->derecho, clave);
         }
     }
 
     // Función auxiliar para recorrer el árbol en orden
     void recorrerRecursivo(NodoBST* nodo) const {
-        
+
         if (nodo != nullptr) {
             recorrerRecursivo(nodo->izquierdo);
             cout << "Canción: " << nodo->clave.second.track_name
-                 << " - Artista: " << nodo->clave.second.artist_name << endl;
+                << " - Artista: " << nodo->clave.second.artist_name << endl;
             recorrerRecursivo(nodo->derecho);
         }
     }
@@ -116,45 +118,50 @@ private:
 
     // Función auxiliar para eliminar un nodo en el árbol
     string aMayuscula(const string& cadena) {
-    string resultado = cadena;
-    transform(resultado.begin(), resultado.end(), resultado.begin(), ::toupper);
-    return resultado;
-}
-
-NodoBST* eliminarRecursivo(NodoBST* nodo, const string& nombreCancion) {
-    if (nodo == nullptr) {
-        return nodo; // Nodo no encontrado
+        string resultado = cadena;
+        transform(resultado.begin(), resultado.end(), resultado.begin(), ::toupper);
+        return resultado;
     }
 
-    // Normalizar nombres a mayúsculas
-    string nombreActual = aMayuscula(nodo->clave.second.track_name);
-    string nombreBuscado = aMayuscula(nombreCancion);
-
-    if (nombreBuscado < nombreActual) {
-        nodo->izquierdo = eliminarRecursivo(nodo->izquierdo, nombreCancion);
-    } else if (nombreBuscado > nombreActual) {
-        nodo->derecho = eliminarRecursivo(nodo->derecho, nombreCancion);
-    } else {
-        // Nodo encontrado: Proceder con eliminación
-        if (nodo->izquierdo == nullptr && nodo->derecho == nullptr) {
-            delete nodo;
-            return nullptr;
-        } else if (nodo->izquierdo == nullptr) {
-            NodoBST* temp = nodo->derecho;
-            delete nodo;
-            return temp;
-        } else if (nodo->derecho == nullptr) {
-            NodoBST* temp = nodo->izquierdo;
-            delete nodo;
-            return temp;
-        } else {
-            NodoBST* temp = encontrarMin(nodo->derecho);
-            nodo->clave = temp->clave;
-            nodo->derecho = eliminarRecursivo(nodo->derecho, temp->clave.second.track_name);
+    NodoBST* eliminarRecursivo(NodoBST* nodo, const string& nombreCancion) {
+        if (nodo == nullptr) {
+            return nodo; // Nodo no encontrado
         }
+
+        // Normalizar nombres a mayúsculas
+        string nombreActual = aMayuscula(nodo->clave.second.track_name);
+        string nombreBuscado = aMayuscula(nombreCancion);
+
+        if (nombreBuscado < nombreActual) {
+            nodo->izquierdo = eliminarRecursivo(nodo->izquierdo, nombreCancion);
+        }
+        else if (nombreBuscado > nombreActual) {
+            nodo->derecho = eliminarRecursivo(nodo->derecho, nombreCancion);
+        }
+        else {
+            // Nodo encontrado: Proceder con eliminación
+            if (nodo->izquierdo == nullptr && nodo->derecho == nullptr) {
+                delete nodo;
+                return nullptr;
+            }
+            else if (nodo->izquierdo == nullptr) {
+                NodoBST* temp = nodo->derecho;
+                delete nodo;
+                return temp;
+            }
+            else if (nodo->derecho == nullptr) {
+                NodoBST* temp = nodo->izquierdo;
+                delete nodo;
+                return temp;
+            }
+            else {
+                NodoBST* temp = encontrarMin(nodo->derecho);
+                nodo->clave = temp->clave;
+                nodo->derecho = eliminarRecursivo(nodo->derecho, temp->clave.second.track_name);
+            }
+        }
+        return nodo;
     }
-    return nodo;
-}
 
 public:
 
@@ -164,7 +171,7 @@ public:
     // Insertar una nueva canción en el árbol
     void insertar(const Cancion& c) {
         size_t hashClave = c.hash(); // Calcular el hash de la canción
-        insertarRecursivo(raiz, {hashClave, c});
+        insertarRecursivo(raiz, { hashClave, c });
     }
 
     // Recorrer el árbol en orden y devolver true si hay elementos
@@ -175,52 +182,54 @@ public:
         recorrerRecursivo(raiz);
         return true; // Árbol no vacío
     }
-    
-    bool auxiliarRecorrer() const{
-        
+
+    bool auxiliarRecorrer() const {
+
         if (estaVacio(raiz)) {
             return false; // Árbol vacío
-        }else{
+        }
+        else {
             return true;
         }
     }
     bool eliminar(const string& nombreCancion) {
         raiz = eliminarRecursivo(raiz, nombreCancion);
-        if(estaVacio(raiz)){
+        if (estaVacio(raiz)) {
             return false;
-        }else{
-            
-            return true;
-        }   
-    }
-    
-    void buscarPorPrefijo(const string& prefijo, vector<string>& resultados) const {
-    // Convertir el prefijo a mayúsculas para comparar
-    string prefijoMayus = prefijo;
-    transform(prefijoMayus.begin(), prefijoMayus.end(), prefijoMayus.begin(), ::toupper);
+        }
+        else {
 
-    buscarPorPrefijoRec(raiz, prefijoMayus, resultados);
-}
+            return true;
+        }
+    }
+
+    void buscarPorPrefijo(const string& prefijo, vector<string>& resultados) const {
+        // Convertir el prefijo a mayúsculas para comparar
+        string prefijoMayus = prefijo;
+        transform(prefijoMayus.begin(), prefijoMayus.end(), prefijoMayus.begin(), ::toupper);
+
+        buscarPorPrefijoRec(raiz, prefijoMayus, resultados);
+    }
 
 private:
-void buscarPorPrefijoRec(NodoBST* nodo, const string& prefijo, vector<string>& resultados) const {
-    if (nodo == nullptr) {
-        return; // Base de la recursión: nodo vacío
+    void buscarPorPrefijoRec(NodoBST* nodo, const string& prefijo, vector<string>& resultados) const {
+        if (nodo == nullptr) {
+            return; // Base de la recursión: nodo vacío
+        }
+
+        // Convertir el nombre de la canción actual a mayúsculas para comparación
+        string nombreMayus = nodo->clave.second.track_name;
+        transform(nombreMayus.begin(), nombreMayus.end(), nombreMayus.begin(), ::toupper);
+
+        // Si el nombre de la canción comienza con el prefijo, agregar a los resultados
+        if (nombreMayus.rfind(prefijo, 0) == 0) { // `rfind` con `0` verifica si comienza con el prefijo
+            resultados.push_back(nodo->clave.second.track_name + " - " + nodo->clave.second.artist_name);
+        }
+
+        // Recorrer el subárbol izquierdo y derecho
+        buscarPorPrefijoRec(nodo->izquierdo, prefijo, resultados);
+        buscarPorPrefijoRec(nodo->derecho, prefijo, resultados);
     }
-
-    // Convertir el nombre de la canción actual a mayúsculas para comparación
-    string nombreMayus = nodo->clave.second.track_name;
-    transform(nombreMayus.begin(), nombreMayus.end(), nombreMayus.begin(), ::toupper);
-
-    // Si el nombre de la canción comienza con el prefijo, agregar a los resultados
-    if (nombreMayus.rfind(prefijo, 0) == 0) { // `rfind` con `0` verifica si comienza con el prefijo
-        resultados.push_back(nodo->clave.second.track_name + " - " + nodo->clave.second.artist_name);
-    }
-
-    // Recorrer el subárbol izquierdo y derecho
-    buscarPorPrefijoRec(nodo->izquierdo, prefijo, resultados);
-    buscarPorPrefijoRec(nodo->derecho, prefijo, resultados);
-}
 };
 
 // Función para leer y cargar canciones desde un archivo CSV
@@ -277,7 +286,8 @@ void cargar_canciones_desde_csv(const string& nombre_archivo, BST arboles[26]) {
             }
         }
 
-    } else {
+    }
+    else {
         cerr << "No se pudo abrir el archivo " << nombre_archivo << endl;
     }
 }
@@ -332,7 +342,8 @@ void agregarCancion(BST arboles[]) {
         int indice = letra_inicial - 'A';
         arboles[indice].insertar(nuevaCancion); // Insertar la canción en el árbol correspondiente
         cout << "La canción se ha agregado correctamente al bucket " << letra_inicial << "." << endl;
-    } else {
+    }
+    else {
         cerr << "Error: El nombre de la canción no comienza con una letra válida." << endl;
     }
 }
@@ -349,19 +360,21 @@ void eliminarCancion(BST arboles[26]) {
         int indice = letra_inicial - 'A';
 
         // Intentar eliminar la canción del BST correspondiente
-        
-        if(arboles[indice].eliminar(nombreCancion)){
-        
+
+        if (arboles[indice].eliminar(nombreCancion)) {
+
             cout << "Se eliminó la canción: \"" << nombreCancion << "\" en el bucket " << letra_inicial << "." << endl;
-        }else{
-            
-            cout<<"Nombre inválido"<<endl;
         }
-            
-    }else {
+        else {
+
+            cout << "Nombre inválido" << endl;
+        }
+
+    }
+    else {
         cout << "Error: El nombre de la canción no comienza con una letra válida." << endl;
     }
-    
+
 }
 
 
@@ -378,22 +391,24 @@ void buscarCanciones(const BST arboles[], const string& consulta) {
     char letraInicial = toupper(consulta[0]);
     if (letraInicial >= 'A' && letraInicial <= 'Z') {
         int indice = letraInicial - 'A';
-        cout << "Resultados de búsqueda para \"" << consulta << "\":" << endl<<endl;
+        cout << "Resultados de búsqueda para \"" << consulta << "\":" << endl << endl;
 
         // Buscar en el BST correspondiente
         vector<string> resultados;
         arboles[indice].buscarPorPrefijo(consultaMayus, resultados);
-        
-         if (!resultados.empty()) {
+
+        if (!resultados.empty()) {
             for (const string& resultado : resultados) {
                 cout << resultado << endl;
             }
-            cout<<endl;
-        } else {
-            cout << "No se encontraron resultados para \"" << consulta << "\"." << endl<<endl;
+            cout << endl;
+        }
+        else {
+            cout << "No se encontraron resultados para \"" << consulta << "\"." << endl << endl;
         }
 
-    } else {
+    }
+    else {
         cout << "Error: La consulta no comienza con una letra válida." << endl;
     }
 }
@@ -423,13 +438,14 @@ void imprimirCancionesAleatorias(BST arboles[26]) {
     // Imprimir las canciones mezcladas
     cout << "Canciones en orden aleatorio:\n";
     for (const auto& cancion : todasLasCanciones) {
-        cout <<"Canción: "<< cancion.track_name << " - Artista: " << cancion.artist_name << endl;
+        cout << "Canción: " << cancion.track_name << " - Artista: " << cancion.artist_name << endl;
     }
-    cout<<endl;
+    cout << endl;
 }
 void cambiar_orden(BST arboles[26], int pos1, int pos2) {
     vector<Cancion> todasLasCanciones;
 
+    cout << "3 RAYAS DE COCAINA" << endl;
     // Recopila canciones de todos los buckets
     for (int i = 0; i < 26; ++i) {
         recopilarCanciones(arboles[i].raiz, todasLasCanciones);
@@ -447,25 +463,18 @@ void cambiar_orden(BST arboles[26], int pos1, int pos2) {
 
     // Intercambiar las canciones en las posiciones especificadas
     swap(todasLasCanciones[index1], todasLasCanciones[index2]);
-
-    // Vaciar los árboles y reconstruirlos con el nuevo orden
-    for (int i = 0; i < 26; ++i) {
-        arboles[i] = BST(); // Reiniciar los árboles
-    }
-
-    for (const auto& cancion : todasLasCanciones) {
-        char letra_inicial = toupper(cancion.track_name[0]);
-        if (letra_inicial >= 'A' && letra_inicial <= 'Z') {
-            arboles[letra_inicial - 'A'].insertar(cancion);
-        }
-    }
+    
+   
 
     cout << "Las posiciones " << pos1 << " y " << pos2 << " han sido intercambiadas." << endl;
-    
+
     for (int i = 0; i < todasLasCanciones.size(); i++) {
-        cout <<"Cancion: " <<todasLasCanciones.at(i).track_name <<" - Artista: "<<todasLasCanciones.at(i).artist_name<<endl; ;
+        cout << "Cancion: " << todasLasCanciones.at(i).track_name << " - Artista: " << todasLasCanciones.at(i).artist_name << endl; 
     }
-    cout<<endl;
+
+    cout << endl;
+
+    return; 
 }
 
 int main() {
@@ -474,79 +483,78 @@ int main() {
     cout << "Cargando archivo..." << endl;
     cargar_canciones_desde_csv("spotify_data.csv", arboles);
     cout << "Archivo cargado." << endl;
-    int entrada= 99;
-    
-    while(entrada!=0){
+    int entrada = 99;
 
-        cout<<"Menú:"<<endl;
-        cout<<"digite 1 para agregar una cancion"<<endl;
-        cout<<"digite 2 para eliminar una canción"<<endl;
-        cout<<"digite 3 para buscar una canción"<<endl;
-        cout<<"digite 4 para imprimir las canciones"<<endl;
-        cout<<"digite 5 para reproducir de manera aleatoria las canciones"<<endl;
-        cout<<"digite 6 para cambiar el orden de las canciones"<<endl;
-        cout<<"digite 0 para salir"<<endl;
-        
-        cin>>entrada;
-        if(entrada ==1){
-            
+    while (entrada != 0) {
+
+        cout << "Menú:" << endl;
+        cout << "digite 1 para agregar una cancion" << endl;
+        cout << "digite 2 para eliminar una canción" << endl;
+        cout << "digite 3 para buscar una canción" << endl;
+        cout << "digite 4 para imprimir las canciones" << endl;
+        cout << "digite 5 para reproducir de manera aleatoria las canciones" << endl;
+        cout << "digite 6 para cambiar el orden de las canciones" << endl;
+        cout << "digite 0 para salir" << endl;
+
+        cin >> entrada;
+        if (entrada == 1) {
+
             agregarCancion(arboles);
         }
-        
-        if(entrada==2){
-            
+
+        if (entrada == 2) {
+
             eliminarCancion(arboles);
-            
+
         }
-        
-        if(entrada==3){
-            
+
+        if (entrada == 3) {
+
             cout << "Ingrese la letra, palabra o frase para buscar: ";
-                cin.ignore();
-                string consulta;
-                getline(cin, consulta);
-                buscarCanciones(arboles, consulta);
-                
+            cin.ignore();
+            string consulta;
+            getline(cin, consulta);
+            buscarCanciones(arboles, consulta);
+
         }
-    
+
         if (entrada == 4) {
             for (int i = 0; i < 26; ++i) {
                 // Solo imprimir si el árbol tiene canciones
-                
+
                 if (arboles[i].auxiliarRecorrer()) {
-                    cout << "Canciones que comienzan con la letra: " << char('A' + i) << endl<<endl;
+                    cout << "Canciones que comienzan con la letra: " << char('A' + i) << endl << endl;
                     arboles[i].recorrer();
-                    cout<<endl;
+                    cout << endl;
                     // Ya se imprime dentro de `recorrer()`, no es necesario volver a imprimir aquí
                 }
             }
-            cout<<endl;
+            cout << endl;
         }
-        
-        if(entrada== 5){
-            
+
+        if (entrada == 5) {
+
             imprimirCancionesAleatorias(arboles);
         }
-        
-        if(entrada == 6){
-            
+
+        if (entrada == 6) {
+
             int pos1;
             int pos2;
-            
-            cout<<"Ingrese la posición de la canción"<<endl;
-            cin>>pos1;
-            cout<<"Ingrese la posición a la que se desea cambiar"<<endl;
-            cin>>pos2;
-            
+
+            cout << "Ingrese la posición de la canción" << endl;
+            cin >> pos1;
+            cout << "Ingrese la posición a la que se desea cambiar" << endl;
+            cin >> pos2;
+
             cambiar_orden(arboles, pos1, pos2);
         }
-        
-        if(entrada == 0){
-            
+
+        if (entrada == 0) {
+
             return 0;
         }
     }
 
     return 0;
 }
-
