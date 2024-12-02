@@ -222,7 +222,7 @@ private:
         transform(nombreMayus.begin(), nombreMayus.end(), nombreMayus.begin(), ::toupper);
 
         // Si el nombre de la cancion comienza con el prefijo, agregar a los resultados
-        if (nombreMayus.rfind(prefijo, 0) == 0) { // `rfind` con `0` verifica si comienza con el prefijo
+        if (nombreMayus.rfind(prefijo, 0) == 0) { // rfind con 0 verifica si comienza con el prefijo
             resultados.push_back(nodo->clave.second.track_name + " - " + nodo->clave.second.artist_name);
         }
 
@@ -291,6 +291,7 @@ void cargar_canciones_desde_csv(const string& nombre_archivo, BST arboles[26]) {
         cerr << "No se pudo abrir el archivo " << nombre_archivo << endl;
     }
 }
+
 void agregarCancion(BST arboles[]) {
     Cancion nuevaCancion;
 
@@ -377,7 +378,6 @@ void eliminarCancion(BST arboles[26]) {
 
 }
 
-
 void buscarCanciones(const BST arboles[], const string& consulta) {
     if (consulta.empty()) {
         cout << "Error: La consulta esta vacia." << endl;
@@ -442,6 +442,7 @@ void imprimirCancionesAleatorias(BST arboles[26]) {
     }
     cout << endl;
 }
+
 void cambiar_orden(BST arboles[26], int pos1, int pos2) {
     vector<Cancion> todasLasCanciones;
 
@@ -469,13 +470,14 @@ void cambiar_orden(BST arboles[26], int pos1, int pos2) {
     cout << "Las posiciones " << pos1 << " y " << pos2 << " han sido intercambiadas." << endl;
 
     for (int i = 0; i < todasLasCanciones.size(); i++) {
-        cout << "Cancion: " << todasLasCanciones.at(i).track_name << " - Artista: " << todasLasCanciones.at(i).artist_name << endl; 
+        cout << "Cancion: " << todasLasCanciones.at(i).track_name << " - Artista: " << todasLasCanciones.at(i).artist_name << endl;
     }
 
     cout << endl;
 
-    return; 
+    return;
 }
+
 struct Nodo {
     Cancion data;
     Nodo* left;
@@ -491,7 +493,8 @@ bool esNumeroValido(const string& str) {
     try {
         stof(str);  // Convertir a float
         return true;  // Si no lanza excepción, es un número válido
-    } catch (...) {
+    }
+    catch (...) {
         return false;  // Si lanza una excepción, no es un número válido
     }
 }
@@ -527,13 +530,16 @@ void insertarPopular(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const 
         if (orden == "ascendente") {
             if (pop_nueva < pop_actual) {
                 actual = actual->left; // Ir hacia la izquierda
-            } else {
+            }
+            else {
                 actual = actual->right; // Ir hacia la derecha
             }
-        } else { // descendente
+        }
+        else { // descendente
             if (pop_nueva > pop_actual) {
                 actual = actual->left; // Ir hacia la izquierda
-            } else {
+            }
+            else {
                 actual = actual->right; // Ir hacia la derecha
             }
         }
@@ -543,40 +549,115 @@ void insertarPopular(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const 
     if (orden == "ascendente") {
         if (stof(canciones[i].popularity) < stof(padre->data.popularity)) {
             padre->left = nuevoNodo;
-        } else {
+        }
+        else {
             padre->right = nuevoNodo;
         }
-    } else { // descendente
+    }
+    else { // descendente
         if (stof(canciones[i].popularity) > stof(padre->data.popularity)) {
             padre->left = nuevoNodo;
-        } else {
+        }
+        else {
             padre->right = nuevoNodo;
         }
     }
 }
 
-void imprimirInOrder(Nodo* nodo) {
+void insertarDuracion(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const string& orden) {
+    // Verificar si la duración es un número válido antes de insertar
+    if (!esNumeroValido(canciones[i].duration_ms)) {
+        return;  // Ignorar canciones con duración no válida
+    }
+
+    // Crear un nodo nuevo para la canción actual
+    Nodo* nuevoNodo = new Nodo;
+    nuevoNodo->data = canciones[i]; // Asignar la canción actual al nodo
+    nuevoNodo->left = nullptr;
+    nuevoNodo->right = nullptr;
+
+    // Si el árbol está vacío, el nuevo nodo es la raíz
+    if (Ordenado.root == nullptr) {
+        Ordenado.root = nuevoNodo;
+        return;
+    }
+
+    // Insertar en la posición correcta en el árbol según la duración
+    Nodo* actual = Ordenado.root;
+    Nodo* padre = nullptr;
+
+    while (actual != nullptr) {
+        padre = actual;
+
+        // Comparar la duración según el orden especificado
+        float dur_actual = stof(actual->data.duration_ms);
+        float dur_nueva = stof(canciones[i].duration_ms);
+
+        if (orden == "ascendente") {
+            if (dur_nueva < dur_actual) {
+                actual = actual->left; // Ir hacia la izquierda
+            }
+            else {
+                actual = actual->right; // Ir hacia la derecha
+            }
+        }
+        else { // descendente
+            if (dur_nueva > dur_actual) {
+                actual = actual->left; // Ir hacia la izquierda
+            }
+            else {
+                actual = actual->right; // Ir hacia la derecha
+            }
+        }
+    }
+
+    // Insertar el nodo como hijo izquierdo o derecho
+    if (orden == "ascendente") {
+        if (stof(canciones[i].duration_ms) < stof(padre->data.duration_ms)) {
+            padre->left = nuevoNodo;
+        }
+        else {
+            padre->right = nuevoNodo;
+        }
+    }
+    else { // descendente
+        if (stof(canciones[i].duration_ms) > stof(padre->data.duration_ms)) {
+            padre->left = nuevoNodo;
+        }
+        else {
+            padre->right = nuevoNodo;
+        }
+    }
+}
+
+void imprimirInOrder(Nodo* nodo, const string& criterio) {
     if (nodo == nullptr) {
         return;
     }
 
     // Recorrer el subárbol izquierdo
-    imprimirInOrder(nodo->left);
+    imprimirInOrder(nodo->left, criterio);
 
     // Imprimir los datos de la canción
     cout << "Artista: " << nodo->data.artist_name << ", "
-         << "Canción: " << nodo->data.track_name << ", "
-         << "Popularidad: " << nodo->data.popularity << endl;
+        << "Canción: " << nodo->data.track_name << ", ";
+
+    if (criterio == "popularidad") {
+        cout << "Popularidad: " << nodo->data.popularity << endl;
+    }
+    else if (criterio == "duracion") {
+        cout << "Duración (ms): " << nodo->data.duration_ms << endl;
+    }
 
     // Recorrer el subárbol derecho
-    imprimirInOrder(nodo->right);
+    imprimirInOrder(nodo->right, criterio);
 }
 
 void imprimirCancionesOrdenadas(const string& criterio, const string& orden, string filtroAnio) {
-    ifstream archivo("spotify_data.csv");
+    ifstream archivo("spotify_data.csv"); // Asegúrate de usar el nombre correcto del archivo
     BSTaux Ordenado;
 
-    if (criterio == "popularidad") {
+    if (criterio == "popularidad" || criterio == "duracion") {
         string linea;
         bool primera_linea = true;
         vector<Cancion> canciones;
@@ -589,10 +670,9 @@ void imprimirCancionesOrdenadas(const string& criterio, const string& orden, str
                 }
 
                 stringstream ss(linea);
-                string campo;
                 Cancion cancion;
 
-                // Leer cada campo y asignarlo a la estructura de Cancion
+                // Leer cada campo y asignarlo a la estructura de Canción
                 getline(ss, cancion.artist_name, ','); // Saltar el primer número
                 getline(ss, cancion.artist_name, ',');
                 getline(ss, cancion.track_name, ',');
@@ -614,30 +694,67 @@ void imprimirCancionesOrdenadas(const string& criterio, const string& orden, str
                 getline(ss, cancion.duration_ms, ',');
                 getline(ss, cancion.time_signature, ',');
 
-                // Verificar si la popularidad es válida antes de agregar la canción al vector
+                // Filtrar según el año, si filtroAnio no es "0"
+                if (filtroAnio != "0") {
+                    try {
+                        int anioFiltro = stoi(filtroAnio);
+                        if (stoi(cancion.year) != anioFiltro) {
+                            continue; // Omitir canciones que no coincidan con el año
+                        }
+                    }
+                    catch (invalid_argument&) {
+                        // Manejar excepción si es necesario
+                    }
+                }
+
                 canciones.push_back(cancion);
             }
             archivo.close();
 
             // Insertar las canciones en el BST correspondiente
             for (size_t i = 0; i < canciones.size(); ++i) {
-                insertarPopular(Ordenado, canciones, i, orden);
+                if (criterio == "popularidad") {
+                    insertarPopular(Ordenado, canciones, i, orden);
+                }
+                else if (criterio == "duracion") {
+                    insertarDuracion(Ordenado, canciones, i, orden);
+                }
             }
 
             // Imprimir el árbol en orden
-            imprimirInOrder(Ordenado.root);
-
-        } else {
+            imprimirInOrder(Ordenado.root, criterio);
+        }
+        else {
             cerr << "No se pudo abrir el archivo" << endl;
         }
-
-    } else if (criterio == "duracion") {
-        cout << "Criterio 'duracion' aún no implementado." << endl;
-    } else {
+    }
+    else {
         cout << "Asegúrate de escribir según se indicó: 'popularidad' o 'duracion'" << endl;
     }
 }
+
+void limpiarMemoria(NodoBST* nodo) {
+    if (nodo == nullptr) {
+        return;
+    }
+
+    // Liberar memoria de los subárboles izquierdo y derecho
+    limpiarMemoria(nodo->izquierdo);
+    limpiarMemoria(nodo->derecho);
+
+    // Liberar memoria del nodo actual
+    delete nodo;
+}
+
+void limpiarTodosLosBST(BST arboles[26]) {
+    for (int i = 0; i < 26; ++i) {
+        limpiarMemoria(arboles[i].raiz);
+        arboles[i].raiz = nullptr; // Asegurarse de que la raíz se establezca en nullptr después de limpiar
+    }
+}
+
 int main() {
+
     BST arboles[26]; // Crear un arreglo de 26 arboles binarios de busqueda (uno por cada letra del abecedario)
 
     cout << "Cargando archivo..." << endl;
@@ -652,7 +769,7 @@ int main() {
         cout << "digite 2 para eliminar una cancion" << endl;
         cout << "digite 3 para buscar una cancion" << endl;
         cout << "digite 4 para imprimir las canciones" << endl;
-        cout << "digite 5 para imprimir las canciones segun su criterio de busqueda"<<endl;
+        cout << "digite 5 para imprimir las canciones segun su criterio de busqueda" << endl;
         cout << "digite 6 para reproducir de manera aleatoria las canciones" << endl;
         cout << "digite 7 para cambiar el orden de las canciones" << endl;
         cout << "digite 0 para salir" << endl;
@@ -688,27 +805,25 @@ int main() {
                     cout << "Canciones que comienzan con la letra: " << char('A' + i) << endl << endl;
                     arboles[i].recorrer();
                     cout << endl;
-                    // Ya se imprime dentro de `recorrer()`, no es necesario volver a imprimir aqui
+                    // Ya se imprime dentro de recorrer(), no es necesario volver a imprimir aqui
                 }
             }
             cout << endl;
         }
 
-        if(entrada == 5){
-
+        if (entrada == 5) {
             string criterio;
             string orden;
             string filtroAnio;
 
-            cout<<"Escriba popularidad, para ordenar segun la popularidad o duracion, para ordenar segun la duracion de la cancion"<<endl;
-            cin>>criterio;
-            cout<<"Escriba ascendente o descendente para el orden de la impresion"<<endl;
-            cin>>orden;
-            cout<<"Escriba un ano para buscar en base a ese ano, si quiere todas las canciones simplemente ingrese 0"<<endl;
-            cin>>filtroAnio;
+            cout << "Escriba 'popularidad' para ordenar según la popularidad o 'duracion' para ordenar según la duración de la canción" << endl;
+            cin >> criterio;
+            cout << "Escriba 'ascendente' o 'descendente' para el orden de la impresión" << endl;
+            cin >> orden;
+            cout << "Escriba un año para buscar en base a ese año, si quiere todas las canciones simplemente ingrese 0" << endl;
+            cin >> filtroAnio;
 
-            imprimirCancionesOrdenadas(criterio, orden, filtroAnio); 
-
+            imprimirCancionesOrdenadas(criterio, orden, filtroAnio);
         }
 
         if (entrada == 6) {
@@ -728,12 +843,14 @@ int main() {
 
             cambiar_orden(arboles, pos1, pos2);
         }
-
         if (entrada == 0) {
 
+            limpiarTodosLosBST(arboles);
+             cout << "Limpiao" << endl;
             return 0;
         }
-    }
+        
 
-    return 0;
+        }
+
 }
