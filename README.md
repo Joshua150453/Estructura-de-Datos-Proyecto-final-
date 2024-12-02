@@ -1,9 +1,9 @@
 # Proyecto Reproductor
 
 ## Integrantes:
-- Abimael Ernesto Frontado Fajardo
-- Frederick Dicarlo Mares Graos
-- Joshua Diad Ortiz Rosas
+- Abimael Ernesto Frontado Fajardo (100%)
+- Frederick Dicarlo Mares Graos (100%)
+- Joshua Diad Ortiz Rosas (100%)
 
 ## Primer Avance
 
