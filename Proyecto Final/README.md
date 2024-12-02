@@ -1576,3 +1576,7 @@ El programa principal proporciona un menú interactivo con las siguientes opcion
 - Intercambiar el orden de dos canciones.
 - Salir del programa.
 - Al finalizar, limpia toda la memoria utilizada por los árboles.
+##### Notas Importantes
+- El código organiza las canciones en 26 árboles BST, facilitando búsquedas por letras iniciales.
+- La funcionalidad de ordenamiento y reproducción aleatoria utiliza estructuras dinámicas y algoritmos eficientes para manejo de datos.
+- Todas las operaciones están optimizadas para manejar archivos grandes, pero requieren que el archivo CSV esté correctamente formateado.
