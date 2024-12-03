@@ -1,5 +1,7 @@
 # Proyecto Reproductor
 
+- Ingresar a Proyecto Final pare ver todos los archivo
+  
 ## Integrantes:
 - Abimael Ernesto Frontado Fajardo (100%)
 - Frederick Dicarlo Mares Graos (100%)
