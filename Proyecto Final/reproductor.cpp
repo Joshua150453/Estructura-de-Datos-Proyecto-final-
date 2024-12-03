@@ -7,6 +7,7 @@
 #include <algorithm> // Para std::transform
 #include <ctime> 
 #include <random>
+#include <limits> 
 using namespace std;
 
 // Estructura para almacenar informacion de una cancion
@@ -123,45 +124,43 @@ private:
         return resultado;
     }
 
-    NodoBST* eliminarRecursivo(NodoBST* nodo, const string& nombreCancion) {
+    NodoBST* eliminarRecursivo(NodoBST* nodo, const string& nombreCancion, const string& nombreArtista) {
         if (nodo == nullptr) {
             return nodo; // Nodo no encontrado
         }
 
-        // Normalizar nombres a mayusculas
+        // Normalizar nombres a mayúsculas
         string nombreActual = aMayuscula(nodo->clave.second.track_name);
+        string artistaActual = aMayuscula(nodo->clave.second.artist_name);
         string nombreBuscado = aMayuscula(nombreCancion);
+        string artistaBuscado = aMayuscula(nombreArtista);
 
-        if (nombreBuscado < nombreActual) {
-            nodo->izquierdo = eliminarRecursivo(nodo->izquierdo, nombreCancion);
-        }
-        else if (nombreBuscado > nombreActual) {
-            nodo->derecho = eliminarRecursivo(nodo->derecho, nombreCancion);
-        }
-        else {
-            // Nodo encontrado: Proceder con eliminacion
+        if (nombreBuscado < nombreActual || (nombreBuscado == nombreActual && artistaBuscado < artistaActual)) {
+            nodo->izquierdo = eliminarRecursivo(nodo->izquierdo, nombreCancion, nombreArtista);
+        } else if (nombreBuscado > nombreActual || (nombreBuscado == nombreActual && artistaBuscado > artistaActual)) {
+            nodo->derecho = eliminarRecursivo(nodo->derecho, nombreCancion, nombreArtista);
+        } else {
+            // Nodo encontrado: Proceder con la eliminación
             if (nodo->izquierdo == nullptr && nodo->derecho == nullptr) {
                 delete nodo;
                 return nullptr;
-            }
-            else if (nodo->izquierdo == nullptr) {
+            } else if (nodo->izquierdo == nullptr) {
                 NodoBST* temp = nodo->derecho;
                 delete nodo;
                 return temp;
-            }
-            else if (nodo->derecho == nullptr) {
+            } else if (nodo->derecho == nullptr) {
                 NodoBST* temp = nodo->izquierdo;
                 delete nodo;
                 return temp;
-            }
-            else {
+            } else {
                 NodoBST* temp = encontrarMin(nodo->derecho);
                 nodo->clave = temp->clave;
-                nodo->derecho = eliminarRecursivo(nodo->derecho, temp->clave.second.track_name);
+                nodo->derecho = eliminarRecursivo(nodo->derecho, temp->clave.second.track_name, temp->clave.second.artist_name);
             }
         }
         return nodo;
     }
+
 
 public:
 
@@ -192,16 +191,11 @@ public:
             return true;
         }
     }
-    bool eliminar(const string& nombreCancion) {
-        raiz = eliminarRecursivo(raiz, nombreCancion);
-        if (estaVacio(raiz)) {
-            return false;
-        }
-        else {
-
-            return true;
-        }
+    bool eliminar(const string& nombreCancion, const string& nombreArtista) {
+        raiz = eliminarRecursivo(raiz, nombreCancion, nombreArtista);
+        return !estaVacio(raiz);
     }
+
 
     void buscarPorPrefijo(const string& prefijo, vector<string>& resultados) const {
         // Convertir el prefijo a mayusculas para comparar
@@ -273,18 +267,15 @@ void cargar_canciones_desde_csv(const string& nombre_archivo, BST arboles[26]) {
             getline(ss, cancion.time_signature, ',');
 
             // Guardar la cancion en un vector
-            canciones.push_back(cancion);
+            char letra_inicial = toupper(cancion.track_name[0]);
+            if (letra_inicial >= 'A' && letra_inicial <= 'Z') {
+                // Insertar en el arbol correspondiente
+                arboles[letra_inicial - 'A'].insertar(cancion);
+            }
         }
         archivo.close();
 
         // Insertar las canciones en el BST correspondiente
-        for (size_t i = 0; i < canciones.size(); ++i) {
-            char letra_inicial = toupper(canciones[i].track_name[0]);
-            if (letra_inicial >= 'A' && letra_inicial <= 'Z') {
-                // Insertar en el arbol correspondiente
-                arboles[letra_inicial - 'A'].insertar(canciones[i]);
-            }
-        }
 
     }
     else {
@@ -349,34 +340,68 @@ void agregarCancion(BST arboles[]) {
     }
 }
 
-void eliminarCancion(BST arboles[26]) {
+void eliminarCancion( BST Aux[26]) {
     string nombreCancion;
-    cout << "Ingrese el nombre de la cancion a eliminar: ";
-    cin.ignore(); // Limpiar el buffer de entrada
+    ifstream archivo("spotify_data.txt");
+    string nombreArtista;
+    cout << "Ingrese el nombre de la canción: " << endl;
     getline(cin, nombreCancion);
 
-    // Determinar el bucket en funcion de la letra inicial
-    char letra_inicial = toupper(nombreCancion[0]);
-    if (letra_inicial >= 'A' && letra_inicial <= 'Z') {
-        int indice = letra_inicial - 'A';
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    
+    cout << "Ingrese el nombre del artista: " << endl;
+    getline(cin, nombreArtista);
 
-        // Intentar eliminar la cancion del BST correspondiente
+    string linea;
+    bool primera_linea = true;
 
-        if (arboles[indice].eliminar(nombreCancion)) {
-
-            cout << "Se elimino la cancion: \"" << nombreCancion << "\" en el bucket " << letra_inicial << "." << endl;
-        }
-        else {
-
-            cout << "Nombre invalido" << endl;
+    while (getline(archivo, linea)) {
+        if (primera_linea) {
+            primera_linea = false; // Saltar la primera línea (cabecera del archivo).
+            continue;
         }
 
-    }
-    else {
-        cout << "Error: El nombre de la cancion no comienza con una letra valida." << endl;
-    }
+        stringstream ss(linea);
+        Cancion cancion;
 
+        // Leer todos los campos de la canción.
+        getline(ss, cancion.artist_name, ',');
+        getline(ss, cancion.track_name, ',');
+        getline(ss, cancion.track_id, ',');
+        getline(ss, cancion.popularity, ',');
+        getline(ss, cancion.year, ',');
+        getline(ss, cancion.genre, ',');
+        getline(ss, cancion.danceability, ',');
+        getline(ss, cancion.energy, ',');
+        getline(ss, cancion.key, ',');
+        getline(ss, cancion.loudness, ',');
+        getline(ss, cancion.mode, ',');
+        getline(ss, cancion.speechiness, ',');
+        getline(ss, cancion.acousticness, ',');
+        getline(ss, cancion.instrumentalness, ',');
+        getline(ss, cancion.liveness, ',');
+        getline(ss, cancion.valence, ',');
+        getline(ss, cancion.tempo, ',');
+        getline(ss, cancion.duration_ms, ',');
+        getline(ss, cancion.time_signature, ',');
+
+        // Comparar y omitir la canción a eliminar.
+        if (cancion.track_name != nombreCancion && cancion.artist_name != nombreArtista) {
+            char letra_inicial = toupper(cancion.track_name[0]);
+        if (letra_inicial >= 'A' && letra_inicial <= 'Z') {
+            Aux[letra_inicial - 'A'].insertar(cancion);
+        }
+        }
+
+        // Insertar la canción directamente en el árbol correspondiente.
+        
+    }
+    archivo.close();
+
+    
+    
 }
+
 
 void buscarCanciones(const BST arboles[], const string& consulta) {
     if (consulta.empty()) {
@@ -499,15 +524,15 @@ bool esNumeroValido(const string& str) {
     }
 }
 
-void insertarPopular(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const string& orden) {
+void insertarPopular(BSTaux& Ordenado, Cancion cancion, const string& orden) {
     // Verificar si la popularidad es un número válido antes de insertar
-    if (!esNumeroValido(canciones[i].popularity)) {
+    if (!esNumeroValido(cancion.popularity)) {
         return;  // Ignorar canciones con popularidad no válida
     }
 
     // Crear un nodo nuevo para la canción actual
     Nodo* nuevoNodo = new Nodo;
-    nuevoNodo->data = canciones[i]; // Asignar la canción actual al nodo
+    nuevoNodo->data = cancion; // Asignar la canción actual al nodo
     nuevoNodo->left = nullptr;
     nuevoNodo->right = nullptr;
 
@@ -525,7 +550,7 @@ void insertarPopular(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const 
         padre = actual;
         // Comparar la popularidad según el orden especificado
         float pop_actual = stof(actual->data.popularity);
-        float pop_nueva = stof(canciones[i].popularity);
+        float pop_nueva = stof(cancion.popularity);
 
         if (orden == "ascendente") {
             if (pop_nueva < pop_actual) {
@@ -547,7 +572,7 @@ void insertarPopular(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const 
 
     // Insertar el nodo como hijo izquierdo o derecho
     if (orden == "ascendente") {
-        if (stof(canciones[i].popularity) < stof(padre->data.popularity)) {
+        if (stof(cancion.popularity) < stof(padre->data.popularity)) {
             padre->left = nuevoNodo;
         }
         else {
@@ -555,7 +580,7 @@ void insertarPopular(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const 
         }
     }
     else { // descendente
-        if (stof(canciones[i].popularity) > stof(padre->data.popularity)) {
+        if (stof(cancion.popularity) > stof(padre->data.popularity)) {
             padre->left = nuevoNodo;
         }
         else {
@@ -564,15 +589,15 @@ void insertarPopular(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const 
     }
 }
 
-void insertarDuracion(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const string& orden) {
+void insertarDuracion(BSTaux& Ordenado, Cancion cancion, const string& orden) {
     // Verificar si la duración es un número válido antes de insertar
-    if (!esNumeroValido(canciones[i].duration_ms)) {
+    if (!esNumeroValido(cancion.duration_ms)) {
         return;  // Ignorar canciones con duración no válida
     }
 
     // Crear un nodo nuevo para la canción actual
     Nodo* nuevoNodo = new Nodo;
-    nuevoNodo->data = canciones[i]; // Asignar la canción actual al nodo
+    nuevoNodo->data = cancion; // Asignar la canción actual al nodo
     nuevoNodo->left = nullptr;
     nuevoNodo->right = nullptr;
 
@@ -591,7 +616,7 @@ void insertarDuracion(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const
 
         // Comparar la duración según el orden especificado
         float dur_actual = stof(actual->data.duration_ms);
-        float dur_nueva = stof(canciones[i].duration_ms);
+        float dur_nueva = stof(cancion.duration_ms);
 
         if (orden == "ascendente") {
             if (dur_nueva < dur_actual) {
@@ -613,7 +638,7 @@ void insertarDuracion(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const
 
     // Insertar el nodo como hijo izquierdo o derecho
     if (orden == "ascendente") {
-        if (stof(canciones[i].duration_ms) < stof(padre->data.duration_ms)) {
+        if (stof(cancion.duration_ms) < stof(padre->data.duration_ms)) {
             padre->left = nuevoNodo;
         }
         else {
@@ -621,7 +646,7 @@ void insertarDuracion(BSTaux& Ordenado, vector<Cancion>& canciones, int i, const
         }
     }
     else { // descendente
-        if (stof(canciones[i].duration_ms) > stof(padre->data.duration_ms)) {
+        if (stof(cancion.duration_ms) > stof(padre->data.duration_ms)) {
             padre->left = nuevoNodo;
         }
         else {
@@ -707,19 +732,17 @@ void imprimirCancionesOrdenadas(const string& criterio, const string& orden, str
                     }
                 }
 
-                canciones.push_back(cancion);
+                
+                 if (criterio == "popularidad") {
+                    insertarPopular(Ordenado, cancion, orden);
+                }
+                else if (criterio == "duracion") {
+                    insertarDuracion(Ordenado,cancion, orden);
+                }
             }
             archivo.close();
 
             // Insertar las canciones en el BST correspondiente
-            for (size_t i = 0; i < canciones.size(); ++i) {
-                if (criterio == "popularidad") {
-                    insertarPopular(Ordenado, canciones, i, orden);
-                }
-                else if (criterio == "duracion") {
-                    insertarDuracion(Ordenado, canciones, i, orden);
-                }
-            }
 
             // Imprimir el árbol en orden
             imprimirInOrder(Ordenado.root, criterio);
@@ -756,7 +779,7 @@ void limpiarTodosLosBST(BST arboles[26]) {
 int main() {
 
     BST arboles[26]; // Crear un arreglo de 26 arboles binarios de busqueda (uno por cada letra del abecedario)
-
+    BST eliminar[26];
     cout << "Cargando archivo..." << endl;
     cargar_canciones_desde_csv("spotify_data.csv", arboles);
     cout << "Archivo cargado." << endl;
@@ -783,8 +806,10 @@ int main() {
 
         if (entrada == 2) {
 
+            
             eliminarCancion(arboles);
-
+            
+            
         }
 
         if (entrada == 3) {
@@ -850,6 +875,10 @@ int main() {
             return 0;
         }
         
+
+    }
+
+}
 
     }
 
