@@ -1,0 +1,21 @@
+<!-- Archivo de manifiesto principal del proyecto -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.juegocolores">
+
+    <application
+        android:allowBackup="true"
+        android:label="Juego de Colores"
+        android:theme="@style/Theme.JuegoDeColores">
+
+        <!-- Actividad principal que contiene el NavHostFragment -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <!-- Indica que esta es la actividad que se lanza al iniciar la app -->
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
